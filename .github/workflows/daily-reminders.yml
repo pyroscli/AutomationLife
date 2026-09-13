@@ -1,0 +1,43 @@
+name: Daily reminders
+
+on:
+  schedule:
+    # 08:00 Asia/Kolkata
+    - cron: "30 2 * * *"
+    # 21:00 Asia/Kolkata
+    - cron: "30 15 * * *"
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: Which reminder to send
+        type: choice
+        options:
+          - auto
+          - morning
+          - night
+        default: auto
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Send reminder
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        run: |
+          kind="${{ github.event.inputs.kind }}"
+          if [ -z "$kind" ] || [ "$kind" = "auto" ]; then
+            hour=$(TZ=Asia/Kolkata date +%H)
+            if [ "$hour" -lt 12 ]; then
+              kind=morning
+            else
+              kind=night
+            fi
+          fi
+          python3 -m daily remind "$kind" --send

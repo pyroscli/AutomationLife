@@ -1,0 +1,36 @@
+name: Monthly summary
+
+on:
+  schedule:
+    # 1st of the month, 09:00 Asia/Kolkata — summarizes the previous month
+    - cron: "30 3 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Write and email last month
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+        run: python3 -m daily summary --previous --send
+      - name: Commit summary
+        run: |
+          git config user.name "daily-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add summaries
+          if git diff --cached --quiet; then
+            echo "No summary changes"
+            exit 0
+          fi
+          git commit -m "Add monthly habit summary"
+          git push

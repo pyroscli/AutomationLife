@@ -1,0 +1,52 @@
+# Edit this file. The agent reads it for reminders, meds, and monthly summaries.
+
+[profile]
+name = "Rajdeep"
+timezone = "Asia/Kolkata"
+email = "web3withsingh@gmail.com"
+
+# Local clock times in the timezone above.
+[reminders]
+morning = "08:00"
+night = "21:00"
+
+[[meds]]
+id = "morning"
+name = "Morning medication"
+time = "08:00"
+note = "Take with water after breakfast"
+
+[[meds]]
+id = "night"
+name = "Night medication"
+time = "21:00"
+note = "Take before bed"
+
+# Your weekday plan. The morning email lists these in order.
+[[schedule]]
+time = "08:00"
+title = "Morning routine + morning med"
+
+[[schedule]]
+time = "09:00"
+title = "Deep work / research"
+
+[[schedule]]
+time = "13:00"
+title = "Lunch break"
+
+[[schedule]]
+time = "14:00"
+title = "Writing / paper work"
+
+[[schedule]]
+time = "18:00"
+title = "Exercise / walk"
+
+[[schedule]]
+time = "20:30"
+title = "Reading"
+
+[[schedule]]
+time = "21:00"
+title = "Night med + log calories, steps, pages"
