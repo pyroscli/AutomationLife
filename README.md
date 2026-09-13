@@ -1,6 +1,6 @@
 # Daily Automation
 
-A small local agent for daily schedule + medication reminders, a git-backed habit ledger, and a month-end summary.
+A small local agent for daily schedule + medication reminders, a git-backed habit ledger, and a month-end summary
 
 Each night you log calories, steps, and pages. Those files live in this repo so you can count them later.
 
