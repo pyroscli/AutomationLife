@@ -60,6 +60,8 @@ chmod +x scripts/install-macos-reminders.sh
 
 ## Nightly log
 
+Full copy-paste guide: [HOW-TO-LOG.md](HOW-TO-LOG.md).
+
 ```bash
 python3 -m daily log --calories 2100 --steps 8200 --pages 14 --book "Deep Work" --med night
 ```
