@@ -11,7 +11,7 @@ def resolve_mail_settings() -> dict[str, str]:
     env = {**load_env(), **os.environ}
     return {
         "address": env.get("GMAIL_ADDRESS", "").strip(),
-        "password": env.get("GMAIL_APP_PASSWORD", "").strip(),
+        "password": env.get("GMAIL_APP_PASSWORD", "").strip().replace(" ", ""),
         "to": env.get("TO_EMAIL", "").strip(),
         "smtp_host": env.get("SMTP_HOST", "smtp.gmail.com").strip(),
         "smtp_port": env.get("SMTP_PORT", "587").strip(),

@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-13",
+  "calories": 2100,
+  "steps": 8000,
+  "pages": 12.0,
+  "book": "TITLE",
+  "meds": {
+    "morning": false,
+    "night": true
+  },
+  "notes": "",
+  "updated_at": "2026-09-13T19:42:07+05:30"
+}
