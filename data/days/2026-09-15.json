@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-15",
+  "calories": 2100,
+  "steps": 10000,
+  "pages": 15.0,
+  "book": "The Compound Effect",
+  "meds": {
+    "morning": true,
+    "night": true
+  },
+  "notes": "",
+  "updated_at": "2026-09-15T23:24:14+05:30"
+}
