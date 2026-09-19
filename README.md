@@ -12,6 +12,7 @@ Each night you log calories, steps, and pages. Those files live in this repo so 
 | Python 3.11+ | Runs the agent. No extra packages. | Already on macOS |
 | Gmail | Sends the reminder and summary emails | You already have Gmail in Cursor |
 | Gmail App Password | Lets GitHub or your Mac send mail | [Create one](https://myaccount.google.com/apppasswords) |
+| Activepieces + Google Sheet | One row per day for the month-end picture | You already connected the sheet |
 | GitHub repo | Runs reminders even when your laptop is closed | Create and push this folder |
 | Optional: this Mac | Local 8:00 / 21:00 jobs if you skip GitHub | Only fires if the Mac is awake |
 
@@ -21,13 +22,13 @@ You do **not** need Slack, Twilio, Apple Health, or a calorie app to start. Type
 
 1. **08:00** — email with today's schedule and the morning med reminder
 2. **21:00** — email with the night med reminder and a prompt to log calories / steps / pages
-3. **You log** those numbers into `data/days/YYYY-MM-DD.json`
-4. **1st of next month** — markdown summary in `summaries/` plus an email
+3. **You log** those numbers with one command: JSON in `data/days/YYYY-MM-DD.json` **and** a new row in the Google Sheet
+4. **1st of next month** — markdown summary in `summaries/` plus an email. Charts and totals also live in the sheet.
 
 ## Setup
 
 1. Put your real email, med names, and schedule in `config.toml`.
-2. Copy `.env.example` to `.env` and add a Gmail App Password.
+2. Copy `.env.example` to `.env` and add a Gmail App Password plus the Activepieces Catch Webhook URL.
 3. Preview a reminder without sending:
 
 ```bash
@@ -77,6 +78,8 @@ Mark the morning med when you take it:
 ```bash
 python3 -m daily log --med morning
 ```
+
+That one command writes the JSON **and** appends the Google Sheet row once `ACTIVEPIECES_WEBHOOK_URL` is set. Use `--no-sheet` to skip the sheet. Backfill with `python3 -m daily sheet --month 2026-09`. Flow setup is in [HOW-TO-LOG.md](HOW-TO-LOG.md).
 
 Then commit the new day file so the monthly job can see it:
 

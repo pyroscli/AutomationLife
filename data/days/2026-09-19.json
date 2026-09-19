@@ -1,0 +1,13 @@
+{
+  "date": "2026-09-19",
+  "calories": 2500,
+  "steps": 9200,
+  "pages": 14.0,
+  "book": "Bird By Bird",
+  "meds": {
+    "morning": true,
+    "night": true
+  },
+  "notes": "",
+  "updated_at": "2026-09-19T14:47:28+05:30"
+}

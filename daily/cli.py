@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import date
 
 from daily.config import ROOT, load_config
 from daily.mail import send_email
 from daily.remind import build_message
-from daily.store import load_day, update_day
+from daily.sheet import WEBHOOK_ENV, SheetSyncError, day_payload, resolve_webhook_url, sync_day
+from daily.store import day_path, list_month, load_day, update_day
 from daily.summary import previous_month, write_summary
 
 
@@ -39,6 +41,21 @@ def main(argv: list[str] | None = None) -> int:
     )
     log.add_argument("--note")
     log.add_argument("--interactive", action="store_true", help="Prompt for missing values")
+    log.add_argument(
+        "--no-sheet",
+        action="store_true",
+        help="Skip the Activepieces / Google Sheet sync for this log",
+    )
+
+    sheet = sub.add_parser("sheet", help="Push saved days to the Google Sheet via Activepieces")
+    sheet.add_argument("--date", help="YYYY-MM-DD, defaults to today in your timezone")
+    sheet.add_argument("--month", help="YYYY-MM, push every saved day in that month")
+    sheet.add_argument("--previous", action="store_true", help="Push every saved day in last month")
+    sheet.add_argument(
+        "--sample",
+        action="store_true",
+        help="Print the JSON payload without calling Activepieces",
+    )
 
     summary = sub.add_parser("summary", help="Write the monthly markdown summary")
     summary.add_argument("--month", help="YYYY-MM, defaults to the current month")
@@ -54,6 +71,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_remind(config, args.kind, send=args.send)
     if args.command == "log":
         return cmd_log(config, args)
+    if args.command == "sheet":
+        return cmd_sheet(config, args)
     if args.command == "summary":
         return cmd_summary(config, args)
     parser.error(f"Unknown command: {args.command}")
@@ -136,7 +155,60 @@ def cmd_log(config, args) -> int:
     print(f"  Calories: {_dash(log.calories)}  Steps: {_dash(log.steps)}  Pages: {_dash(log.pages)}")
     taken = [med_id for med_id, yes in log.meds.items() if yes]
     print(f"  Meds taken: {', '.join(taken) or 'none yet'}")
+    if not args.no_sheet:
+        _sync_sheet(log, missing_ok=True)
     return 0
+
+
+def cmd_sheet(config, args) -> int:
+    today = config.today()
+    if args.previous:
+        year, month = previous_month(today)
+        logs = list_month(year, month, config)
+    elif args.month:
+        year_s, month_s = args.month.split("-", 1)
+        logs = list_month(int(year_s), int(month_s), config)
+    else:
+        day = date.fromisoformat(args.date) if args.date else today
+        if not day_path(day).exists():
+            print(f"No saved log for {day.isoformat()}.")
+            return 1
+        logs = [load_day(day, config)]
+
+    if not logs:
+        print("No saved days to push.")
+        return 1
+
+    if args.sample:
+        print(json.dumps([day_payload(log) for log in logs], indent=2))
+        return 0
+
+    if not resolve_webhook_url():
+        print(f"{WEBHOOK_ENV} is not set. Add the Catch Webhook URL from Activepieces to .env.")
+        return 1
+
+    failed = 0
+    for log in logs:
+        if not _sync_sheet(log, missing_ok=False):
+            failed += 1
+    if failed:
+        print(f"Failed to push {failed} of {len(logs)} day(s).")
+        return 1
+    print(f"Pushed {len(logs)} day(s) to the sheet.")
+    return 0
+
+
+def _sync_sheet(log, *, missing_ok: bool) -> bool:
+    if missing_ok and not resolve_webhook_url():
+        print(f"Sheet sync skipped. Set {WEBHOOK_ENV} in .env when the Activepieces webhook is ready.")
+        return False
+    try:
+        sync_day(log)
+    except SheetSyncError as exc:
+        print(f"Sheet sync failed for {log.date}: {exc}", file=sys.stderr)
+        return False
+    print(f"Sheet synced for {log.date}")
+    return True
 
 
 def cmd_summary(config, args) -> int:

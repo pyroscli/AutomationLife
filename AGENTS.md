@@ -30,6 +30,8 @@ python3 -m daily log --med morning
 python3 -m daily log --med night
 ```
 
+After a log, the same command appends that day to the Google Sheet via Activepieces. Prefer one night `log` with calories, steps, pages, book, and meds together so the sheet gets a single complete row. Do not invent sheet rows. If the webhook is missing, the JSON file is still enough.
+
 ## On the first of the month
 
 ```bash
